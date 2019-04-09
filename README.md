@@ -1,5 +1,5 @@
 # processing-synchronization
-Global synchronization of oscillators for Processing
+Oscillator synchronization for Processing
 
 Based on ideas explored in Bryan Daniels' [paper](http://go.owu.edu/~physics/StudentResearch/2005/BryanDaniels/kuramoto_paper.pdf). From the abstract:
 
