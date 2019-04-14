@@ -1,15 +1,13 @@
-# processing-synchronization
-**Oscillator synchronization for Processing**
-
-- Implements the [Kuramoto model](https://en.wikipedia.org/wiki/Kuramoto_model) for synchronization.
-- Supports oscillator networks with arbitrary sizes, levels of coupling, and time steps.
-- Includes Perlin noise.
-- Still early days. Things will break.
-
-## Example
-The following example initializes a small network of coupled oscillators and tracks their synchronization. Visualization borrowed from the Wikipedia article.
-
-```java
+/*
+ * Circle Example.
+ *
+ * Initialize a small network of couple oscillators and watch them synchronize
+ * around a circle. Point to the average phase (angle) of the network, varying
+ * length based on the order (cohesion).
+ * 
+ * Visualization idea borrowed from the Wikipedia article for the Kuramoto model.
+ * https://en.wikipedia.org/wiki/Kuramoto_model
+ */
 import sync.*;
 
 PNetwork net;
@@ -31,7 +29,7 @@ void setup() {
 void draw() {
   background(220);
   translate(width/2, height/2);
-
+  
   // Draw an ellipse corresponding to the phase of each oscillator
   fill(25, 165, 255);
   for (int i = 0; i < net.networkSize; i++) {
@@ -42,13 +40,12 @@ void draw() {
     ellipse(0, 0, 10, 10);
     popMatrix();
   }
-
+  
   // Draw a line pointing to the average phase of the network
   pushMatrix();
   rotate(-net.averagePhase);
   line(0, 0, radius*net.orderParameter, 0);
   popMatrix();
-
+  
   net.step();
 }
-```
