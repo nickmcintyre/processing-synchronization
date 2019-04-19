@@ -1,7 +1,7 @@
 /*
  * Circle Example.
  *
- * Initialize a small network of couple oscillators and watch them synchronize
+ * Initialize a small network of coupled oscillators and watch them synchronize
  * around a circle. Point to the average phase (angle) of the network, varying
  * length based on the order (cohesion).
  * 
@@ -11,16 +11,13 @@
 import sync.*;
 
 PNetwork net;
-int networkSize;
-float coupling;
-float stepSize;
 float radius;
 
 void setup() {
-  size(400, 400);
-  networkSize = 10;
-  coupling = 3.5;
-  stepSize = 0.05;
+  size(640, 360);
+  int networkSize = 10;
+  float coupling = 3.5;
+  float stepSize = 0.05;
   net = new PNetwork(this, networkSize, coupling, stepSize);
   radius = 75;
   frameRate(12);
@@ -40,8 +37,8 @@ void draw() {
   stroke(25, 165, 255);
   for (int i = 0; i < net.networkSize; i++) {
     pushMatrix();
-    float x = radius * cos(net.phase[i]);
-    float y = radius * sin(net.phase[i]);
+    float x = radius*cos(net.phase[i]);
+    float y = radius*sin(net.phase[i]);
     translate(x, y);
     ellipse(0, 0, 10, 10);
     popMatrix();
