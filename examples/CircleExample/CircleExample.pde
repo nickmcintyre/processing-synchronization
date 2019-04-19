@@ -30,8 +30,14 @@ void draw() {
   background(220);
   translate(width/2, height/2);
   
+  // Draw an elliptical track
+  stroke(100);
+  noFill();
+  ellipse(0, 0, 2*radius, 2*radius);
+  
   // Draw an ellipse corresponding to the phase of each oscillator
   fill(25, 165, 255);
+  stroke(25, 165, 255);
   for (int i = 0; i < net.networkSize; i++) {
     pushMatrix();
     float x = radius * cos(net.phase[i]);
@@ -44,6 +50,7 @@ void draw() {
   // Draw a line pointing to the average phase of the network
   pushMatrix();
   rotate(-net.averagePhase);
+  stroke(100);
   line(0, 0, radius*net.orderParameter, 0);
   popMatrix();
   

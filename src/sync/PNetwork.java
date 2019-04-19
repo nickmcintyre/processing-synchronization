@@ -102,8 +102,8 @@ public class PNetwork implements PConstants {
 	 */
 	private void solveRK4() {
 		calculateOrder();
+		float noise = parent.noise(time);
 		for (int i = 0; i < networkSize; i++) {
-			float noise = parent.noise(time);
 			float k1 = stepSize*differentiate(phase[i], noise, naturalFrequency[i]);
 			float k2 = stepSize*differentiate(phase[i] + k1/2, noise, naturalFrequency[i]);
 			float k3 = stepSize*differentiate(phase[i] + k2/2, noise, naturalFrequency[i]);
