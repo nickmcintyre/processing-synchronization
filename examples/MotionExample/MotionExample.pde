@@ -34,8 +34,6 @@ void draw() {
   ellipse(0, 0, 2*radius, 2*radius);
   
   // Draw a circle corresponding to the phase of each oscillator
-  fill(25, 165, 255);
-  stroke(25, 165, 255);
   for (int i = 0; i < net.networkSize; i++) {
     pushMatrix();
     float x = radius*cos(net.phase[i]);
