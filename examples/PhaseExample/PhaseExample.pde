@@ -1,5 +1,5 @@
 /*
- * Square Example.
+ * Phase Example.
  *
  * Initialize a small network of coupled, oscillating squares and watch them
  * synchronize.
