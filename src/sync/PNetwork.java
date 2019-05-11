@@ -14,6 +14,7 @@ import processing.core.*;
  *
  * @example MotionExample
  * @example PhaseExample
+ * @example ParameterExample
  */
 public class PNetwork implements PConstants {
 
@@ -25,12 +26,13 @@ public class PNetwork implements PConstants {
 	public float coupling;
 	public float orderParameter;
 	public float averagePhase;
+	public float noiseLevel;
 	
 	public float[] naturalFrequency;
 	public float[] phase;
 	public float[] velocity;
 	public float[] acceleration;
-
+	
 	/**
 	 * Initialize the PNetwork object.
 	 *
@@ -38,14 +40,16 @@ public class PNetwork implements PConstants {
 	 * @param _networkSize The number of oscillators in the network
 	 * @param _coupling The level of coupling in the network
 	 * @param _stepSize The size of the time step
+	 * @param _noiseLevel The level of noise (0-1)
 	 */
-	public PNetwork(PApplet _parent, int _networkSize, float _coupling, float _stepSize) {
+	public PNetwork(PApplet _parent, int _networkSize, float _coupling, float _stepSize, float _noiseLevel) {
 		parent = _parent;
 		parent.registerMethod("dispose", this);
 		networkSize = _networkSize;
 		time = 0.0f;
 		stepSize = _stepSize;
 		coupling = _coupling;
+		noiseLevel = PApplet.constrain(_noiseLevel, 0.0f, 1.0f);
 		orderParameter = 1.0f;
 		averagePhase = PI;
 		naturalFrequency = new float[networkSize];
@@ -56,6 +60,18 @@ public class PNetwork implements PConstants {
 		initializePhase();
 		initializeVelocity();
 		initializeAcceleration();
+	}
+
+	/**
+	 * Initialize the PNetwork object.
+	 *
+	 * @param _parent The parent PApplet object
+	 * @param _networkSize The number of oscillators in the network
+	 * @param _coupling The level of coupling in the network
+	 * @param _stepSize The size of the time step
+	 */
+	public PNetwork(PApplet _parent, int _networkSize, float _coupling, float _stepSize) {
+		this(_parent, _networkSize, _coupling, _stepSize, 1.0f);
 	}
 	
 	/**
@@ -141,7 +157,7 @@ public class PNetwork implements PConstants {
 	 */
 	private void solveRK4() {
 		calculateOrder();
-		float noise = parent.noise(time);
+		float noise = noiseLevel*parent.noise(time);
 		for (int i = 0; i < networkSize; i++) {
 			float k1 = stepSize*differentiate(phase[i], noise, naturalFrequency[i]);
 			float k2 = stepSize*differentiate(phase[i] + k1/2, noise, naturalFrequency[i]);
