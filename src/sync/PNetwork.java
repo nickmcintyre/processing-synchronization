@@ -15,6 +15,7 @@ import processing.core.*;
  * @example MotionExample
  * @example PhaseExample
  * @example ParameterExample
+ * @example FireflyExample
  */
 public class PNetwork implements PConstants {
 

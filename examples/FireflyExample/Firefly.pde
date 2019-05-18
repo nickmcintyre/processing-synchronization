@@ -1,65 +1,3 @@
-# processing-synchronization
-**Simulate oscillator synchronization with Processing**
-
-- Implements the [Kuramoto model](https://en.wikipedia.org/wiki/Kuramoto_model) for synchronization.
-- Supports oscillator networks with arbitrary sizes, levels of coupling, and time steps.
-- Includes Perlin noise.
-- Still early days. Things will break.
-
-## Example
-The following example simulates the swarming behavior and bioluminescence of fireflies.
-Pairs well with [Owl City](https://youtu.be/zlxPp0vAniY)
-
-Visualization gratefully borrowed from Daniel Shiffman's [Flocking example](https://processing.org/examples/flocking.html).
-```java
-import sync.*;
-
-PNetwork net;
-Swarm swarm;
-
-void setup() {
-  size(640, 360);
-  int networkSize = 150;
-  float coupling = 2.5;
-  float stepSize = 0.05;
-  float noiseLevel = 0.5;
-  net = new PNetwork(this, networkSize, coupling, stepSize, noiseLevel);
-  swarm = new Swarm(net);
-  for (int i = 0; i < networkSize; i++) {
-    swarm.addFly(new Firefly(width/2, height/2));
-  }
-}
-
-void draw() {
-  background(0, 5, 20);
-  swarm.run();
-}
-
-
-// The Swarm (a list of Firefly objects)
-
-class Swarm {
-  ArrayList<Firefly> flies; // An ArrayList for all the fireflies
-  PNetwork net; // A PNetwork of coupled oscillators for managing brightness
-
-  Swarm(PNetwork _net) {
-    flies = new ArrayList<Firefly>(); // Initialize the ArrayList
-    net = _net;
-  }
-
-  void run() {
-    for (int i = 0; i < flies.size(); i++) {
-      flies.get(i).run(flies, net.phase[i]);  // Passing the entire list of fireflies to each firefly individually
-    }
-    net.step();
-  }
-
-  void addFly(Firefly f) {
-    flies.add(f);
-  }
-}
-
-
 // The Firefly class
 
 class Firefly {
@@ -236,5 +174,3 @@ class Firefly {
     }
   }
 }
-```
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This example is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
