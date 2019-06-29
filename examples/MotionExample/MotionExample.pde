@@ -18,8 +18,7 @@ void setup() {
   size(640, 360);
   int networkSize = 5;
   float coupling = 2;
-  float stepSize = 0.05;
-  net = new PNetwork(this, networkSize, coupling, stepSize);
+  net = new PNetwork(this, networkSize, coupling);
   radius = 75;
   frameRate(12);
 }
@@ -57,10 +56,13 @@ void draw() {
   }
   
   // Draw a line pointing to the average phase of the network
+  PVector order = net.calculateOrder();
+  float orderParameter = order.mag();
+  float averagePhase = order.heading();
   pushMatrix();
-  scale(net.orderParameter);
-  float x = radius*cos(net.averagePhase);
-  float y = radius*sin(net.averagePhase);
+  scale(orderParameter);
+  float x = radius*cos(averagePhase);
+  float y = radius*sin(averagePhase);
   stroke(100);
   line(0, 0, x, y);
   popMatrix();

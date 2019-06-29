@@ -13,9 +13,8 @@ void setup() {
   size(640, 360);
   int networkSize = 150;
   float coupling = 2.5;
-  float stepSize = 0.05;
   float noiseLevel = 0.5;
-  net = new PNetwork(this, networkSize, coupling, stepSize, noiseLevel);
+  net = new PNetwork(this, networkSize, coupling, noiseLevel);
   swarm = new Swarm(net);
   for (int i = 0; i < networkSize; i++) {
     swarm.addFly(new Firefly(width/2, height/2));

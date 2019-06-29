@@ -13,7 +13,7 @@ float displacement;
 void setup() {
   size(640, 360);
   int networkSize = 20;
-  float coupling = 4.5;
+  float coupling = 3;
   float stepSize = 0.05;
   net = new PNetwork(this, networkSize, coupling, stepSize);
   side = height/networkSize;
