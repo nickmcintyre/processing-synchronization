@@ -9,7 +9,7 @@ class Firefly {
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
 
-    Firefly(float x, float y) {
+  Firefly(float x, float y) {
     acceleration = new PVector(0, 0);
     velocity = PVector.random2D();
     position = new PVector(x, y);
@@ -146,8 +146,7 @@ class Firefly {
       PVector steer = PVector.sub(sum, velocity);
       steer.limit(maxforce);
       return steer;
-    }
-    else {
+    } else {
       return new PVector(0, 0);
     }
   }
@@ -168,8 +167,7 @@ class Firefly {
     if (count > 0) {
       sum.div(count);
       return seek(sum);  // Steer towards the position
-    }
-    else {
+    } else {
       return new PVector(0, 0);
     }
   }

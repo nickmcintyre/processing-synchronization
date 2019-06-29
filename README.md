@@ -66,6 +66,7 @@ void keyPressed() {
       break;
   }
 }
+
 class Arrangement {
   
   int networkSize;
