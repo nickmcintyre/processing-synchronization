@@ -2,8 +2,7 @@
 **Simulate oscillator synchronization with Processing**
 
 - Implements the [Kuramoto model](https://en.wikipedia.org/wiki/Kuramoto_model) for synchronization.
-- Supports oscillator networks with arbitrary sizes, levels of coupling, and time steps.
-- Includes Perlin noise.
+- Supports oscillator networks of arbitrary size, coupling, connective arrangement, and noise level.
 - Still early days. Things will break.
 
 ## Example
