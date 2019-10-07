@@ -1,4 +1,4 @@
-/*
+/**
  * Motion Example.
  *
  * Initialize a small network of coupled oscillators and watch them synchronize
@@ -17,7 +17,7 @@ float radius;
 void setup() {
   size(640, 360);
   int networkSize = 5;
-  float coupling = 2;
+  float coupling = 1;
   net = new PNetwork(this, networkSize, coupling);
   radius = 75;
   frameRate(12);
@@ -25,10 +25,16 @@ void setup() {
 
 void draw() {
   background(220);
-  translate(width/2, height/2);
-  
-  // Draw a track
+  // Calculate the overall order (cohesion) in the network
+  PVector order = net.calculateOrder();
+  float orderParameter = order.mag();
   stroke(100);
+  fill(100);
+  String ordometer = String.format("Order: %.2f", orderParameter);
+  text(ordometer, 10, 20);
+  
+  translate(width/2, height/2);
+  // Draw a track
   noFill();
   ellipse(0, 0, 2*radius, 2*radius);
   
@@ -56,8 +62,6 @@ void draw() {
   }
   
   // Draw a line pointing to the average phase of the network
-  PVector order = net.calculateOrder();
-  float orderParameter = order.mag();
   float averagePhase = order.heading();
   pushMatrix();
   scale(orderParameter);

@@ -1,4 +1,4 @@
-/*
+/**
  * Phase Example.
  *
  * Initialize a small network of coupled, oscillating squares and watch them
@@ -13,9 +13,9 @@ float displacement;
 void setup() {
   size(640, 360);
   int networkSize = 20;
-  float coupling = 3;
-  float stepSize = 0.05;
-  net = new PNetwork(this, networkSize, coupling, stepSize);
+  float coupling = 2;
+  float noiseLevel = 0.5;
+  net = new PNetwork(this, networkSize, coupling, noiseLevel);
   side = height/networkSize;
   displacement = width/4;
   frameRate(12);

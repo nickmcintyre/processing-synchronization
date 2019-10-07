@@ -1,4 +1,4 @@
-/*
+/**
  * Firefly Example. Based on "Flocking" by Daniel Shiffman. CC BY-NC-SA 4.0
  * 
  * Simulate the swarming behavior and bioluminescence of fireflies.
@@ -12,7 +12,7 @@ Swarm swarm;
 void setup() {
   size(640, 360);
   int networkSize = 150;
-  float coupling = 2.5;
+  float coupling = 3;
   float noiseLevel = 0.5;
   net = new PNetwork(this, networkSize, coupling, noiseLevel);
   swarm = new Swarm(net);

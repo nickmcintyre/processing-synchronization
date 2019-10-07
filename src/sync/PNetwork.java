@@ -13,10 +13,9 @@ import processing.core.*;
  * @version     ##library.prettyVersion## (##library.version##)
  *
  * @example BrainExample
+ * @example FireflyExample
  * @example MotionExample
  * @example PhaseExample
- * @example ParameterExample
- * @example FireflyExample
  */
 public class PNetwork implements PConstants {
 
@@ -32,24 +31,26 @@ public class PNetwork implements PConstants {
 	public float[] phase;
 	public float[] velocity;
 	public float[] acceleration;
+	private float[] oldPhase;
+	private float[] oldVelocity;
 	
 	/**
 	 * Initialize the PNetwork object.
 	 *
-	 * @param _parent The parent PApplet object
-	 * @param _networkSize The number of oscillators in the network
-	 * @param _coupling The global level of coupling in the network
-	 * @param _noiseLevel The level of noise (0-1)
-	 * @param _stepSize The size of the time step
+	 * @param parent The parent PApplet object
+	 * @param networkSize The number of oscillators in the network
+	 * @param coupling The global level of coupling in the network
+	 * @param noiseLevel The level of noise (0-1)
+	 * @param stepSize The size of the time step
 	 */
-	public PNetwork(PApplet _parent, int _networkSize, float _coupling, float _noiseLevel, float _stepSize) {
-		parent = _parent;
-		parent.registerMethod("dispose", this);
+	public PNetwork(PApplet parent, int networkSize, float coupling, float noiseLevel, float stepSize) {
+		this.parent = parent;
+		this.parent.registerMethod("dispose", this);
 		time = 0.0f;
-		stepSize = _stepSize;
-		noiseLevel = PApplet.constrain(_noiseLevel, 0.0f, 1.0f);
-		networkSize = _networkSize;
-	    initializeCoupling(_coupling);
+		this.stepSize = PApplet.constrain(stepSize, 0.001f, 1.0f);
+		this.noiseLevel = PApplet.constrain(noiseLevel, 0.0f, 1.0f);
+		this.networkSize = networkSize;
+	    initializeCoupling(coupling);
 		initializeFrequency();
 		initializePhase();
 		initializeVelocity();
@@ -59,46 +60,48 @@ public class PNetwork implements PConstants {
 	/**
 	 * Initialize the PNetwork object.
 	 *
-	 * @param _parent The parent PApplet object
-	 * @param _networkSize The number of oscillators in the network
-	 * @param _coupling The global level of coupling in the network
-	 * @param _noiseLevel The level of noise (0-1)
+	 * @param parent The parent PApplet object
+	 * @param networkSize The number of oscillators in the network
+	 * @param coupling The global level of coupling in the network
+	 * @param noiseLevel The level of noise (0-1)
 	 */
-	public PNetwork(PApplet _parent, int _networkSize, float _coupling, float _noiseLevel) {
-		this(_parent, _networkSize, _coupling, _noiseLevel, 0.05f);
+	public PNetwork(PApplet parent, int networkSize, float coupling, float noiseLevel) {
+		this(parent, networkSize, coupling, noiseLevel, 0.05f);
 	}
 	
 	/**
 	 * Initialize the PNetwork object.
 	 *
-	 * @param _parent The parent PApplet object
-	 * @param _networkSize The number of oscillators in the network
-	 * @param _coupling The global level of coupling in the network
+	 * @param parent The parent PApplet object
+	 * @param networkSize The number of oscillators in the network
+	 * @param coupling The global level of coupling in the network
 	 */
-	public PNetwork(PApplet _parent, int _networkSize, float _coupling) {
-		this(_parent, _networkSize, _coupling, 0.0f);
+	public PNetwork(PApplet parent, int networkSize, float coupling) {
+		this(parent, networkSize, coupling, 0.0f);
 	}
 	
 	/**
 	 * Initialize the PNetwork object.
 	 * 
-	 * @param _parent
-	 * @param _phase
-	 * @param _naturalFrequency
-	 * @param _coupling
-	 * @param _noiseLevel
-	 * @param _stepSize
+	 * @param parent
+	 * @param phase
+	 * @param naturalFrequency
+	 * @param coupling
+	 * @param noiseLevel
+	 * @param stepSize
 	 */
-	public PNetwork(PApplet _parent, float[] _phase, float[] _naturalFrequency, float[][] _coupling, float _noiseLevel, float _stepSize) {
-		parent = _parent;
+	public PNetwork(PApplet parent, float[] phase, float[] naturalFrequency, float[][] coupling, float noiseLevel, float stepSize) {
+		this.parent = parent;
 		parent.registerMethod("dispose", this);
 		time = 0.0f;
-		naturalFrequency = _naturalFrequency;
+		this.naturalFrequency = naturalFrequency;
 		networkSize = naturalFrequency.length;
-		coupling = _coupling;
-		noiseLevel = PApplet.constrain(_noiseLevel, 0.0f, 1.0f);
-		stepSize = _stepSize;
-		phase = _phase;
+		this.coupling = coupling;
+		this.stepSize = PApplet.constrain(stepSize, 0.001f, 1.0f);
+		this.noiseLevel = PApplet.constrain(noiseLevel, 0.0f, 1.0f);
+		this.phase = phase;
+		this.oldPhase = new float[networkSize];
+		setOldPhase();
 		initializeVelocity();
 		initializeAcceleration();
 	}
@@ -106,38 +109,38 @@ public class PNetwork implements PConstants {
 	/**
 	 * Initialize the PNetwork object.
 	 * 
-	 * @param _parent
-	 * @param _phase
-	 * @param _naturalFrequency
-	 * @param _coupling
-	 * @param _noiseLevel
+	 * @param parent
+	 * @param phase
+	 * @param naturalFrequency
+	 * @param coupling
+	 * @param noiseLevel
 	 */
-	public PNetwork(PApplet _parent, float[] _phase, float[] _naturalFrequency, float[][] _coupling, float _noiseLevel) {
-		this(_parent, _phase, _naturalFrequency, _coupling, _noiseLevel, 0.05f);
+	public PNetwork(PApplet parent, float[] phase, float[] naturalFrequency, float[][] coupling, float noiseLevel) {
+		this(parent, phase, naturalFrequency, coupling, noiseLevel, 0.05f);
 	}
 	
 	/**
 	 * Initialize the PNetwork object.
 	 * 
-	 * @param _parent
-	 * @param _phase
-	 * @param _naturalFrequency
-	 * @param _coupling
+	 * @param parent
+	 * @param phase
+	 * @param naturalFrequency
+	 * @param coupling
 	 */
-	public PNetwork(PApplet _parent, float[] _phase, float[] _naturalFrequency, float[][] _coupling) {
-		this(_parent, _phase, _naturalFrequency, _coupling, 0.0f);
+	public PNetwork(PApplet parent, float[] phase, float[] naturalFrequency, float[][] coupling) {
+		this(parent, phase, naturalFrequency, coupling, 0.0f);
 	}
 	
 	/**
 	 * Initialize the coupling matrix for the case of uniform, global coupling.
 	 * 
-	 * @param _coupling
+	 * @param coupling
 	 */
-	private void initializeCoupling(float _coupling) {
-	    coupling = new float[networkSize][networkSize];
+	private void initializeCoupling(float coupling) {
+	    this.coupling = new float[networkSize][networkSize];
 		for (int i = 0; i < networkSize; i++) {
 			for (int j = 0; j < networkSize; j++) {
-				coupling[i][j] = _coupling;
+				this.coupling[i][j] = coupling;
 			}
 		}
 	}
@@ -166,6 +169,18 @@ public class PNetwork implements PConstants {
 			phase[i] = TWO_PI * parent.noise(t);
 			t += dt;
 		}
+		
+		oldPhase = new float[networkSize];
+		setOldPhase();
+	}
+	
+	/**
+	 * Copy the current value of each oscillator's phase into oldPhase.
+	 */
+	private void setOldPhase() {
+		for (int i = 0; i < networkSize; i++) {
+			oldPhase[i] = phase[i];
+		}
 	}
 	
 	/**
@@ -175,6 +190,18 @@ public class PNetwork implements PConstants {
 	    velocity = new float[networkSize];
 		for (int i = 0; i < networkSize; i++) {
 			velocity[i] = 0;
+		}
+		
+		oldVelocity = new float[networkSize];
+		setOldVelocity();
+	}
+	
+	/**
+	 * Copy the current value of each oscillator's velocity into oldVelocity.
+	 */
+	private void setOldVelocity() {
+		for (int i = 0; i < networkSize; i++) {
+			oldVelocity[i] = velocity[i];
 		}
 	}
 	
@@ -186,20 +213,6 @@ public class PNetwork implements PConstants {
 		for (int i = 0; i < networkSize; i++) {
 			acceleration[i] = 0;
 		}
-	}
-	
-	/**
-	 * Calculate the angular velocity of each oscillator.
-	 */
-	private float calculateVelocity(float oldPhase, float newPhase) {
-		return (newPhase - oldPhase) / stepSize;
-	}
-	
-	/**
-	 * Calculate the angular acceleration of each oscillator.
-	 */
-	private float calculateAcceleration(float oldVelocity, float newVelocity) {
-		return (newVelocity - oldVelocity) / stepSize;
 	}
 	
 	/**
@@ -227,31 +240,21 @@ public class PNetwork implements PConstants {
 	 * https://en.wikipedia.org/wiki/Runge-Kutta_methods
 	 */
 	private void solveRK4() {
-		float averagePhase = 0.0f;
-		for (int i = 0; i < networkSize; i++) {
-			averagePhase += phase[i];
-		}
-		
-		averagePhase /= networkSize;
 		float noise = noiseLevel * parent.noise(time);
-		
+		setOldPhase();
+		setOldVelocity();
 		for (int i = 0; i < networkSize; i++) {
 			// Calculate increments
-			float k1 = stepSize * differentiate(0.0f, i, averagePhase, noise);
-			float k2 = stepSize * differentiate(k1/2, i, averagePhase, noise);
-			float k3 = stepSize * differentiate(k2/2, i, averagePhase, noise);
-			float k4 = stepSize * differentiate(k3, i, averagePhase, noise);
+			float k1 = stepSize * differentiate(0.0f, i, noise);
+			float k2 = stepSize * differentiate(k1/2, i, noise);
+			float k3 = stepSize * differentiate(k2/2, i, noise);
+			float k4 = stepSize * differentiate(k3, i, noise);
 			// Update phase
-			float oldPhase = phase[i];
-			float newPhase = (phase[i] + (k1 + 2*k2 + 2*k3 + k4)/6) % TWO_PI;
-			phase[i] = newPhase;
+			phase[i] = (phase[i] + (k1 + 2*k2 + 2*k3 + k4)/6) % TWO_PI;
 			// Update velocity
-			float oldVelocity = velocity[i];
-			float newVelocity = calculateVelocity(oldPhase, newPhase);
-			velocity[i] = newVelocity;
+			velocity[i] = (phase[i] - oldPhase[i]) / stepSize;
 			// Update acceleration
-			float newAcceleration = calculateAcceleration(oldVelocity, newVelocity);
-			acceleration[i] = newAcceleration;
+			acceleration[i] = (velocity[i] - oldVelocity[i]) / stepSize;
 		}
 		
 		time += stepSize;
@@ -263,18 +266,16 @@ public class PNetwork implements PConstants {
 	 * https://en.wikipedia.org/wiki/Kuramoto_model
 	 * 
 	 * @param increment
-	 * @param i
-	 * @param averagePhase
+	 * @param oscIndex
 	 * @param noise
 	 * 
 	 * @return {@code float} time derivative
 	 */
-	private float differentiate(float increment, int i, float averagePhase, float noise) {
-		float derivative = naturalFrequency[i] + noise;
+	private float differentiate(float increment, int oscIndex, float noise) {
+		float derivative = naturalFrequency[oscIndex] + noise;
 		for (int j = 0; j < networkSize; j++) {
-			derivative += coupling[i][j] * PApplet.sin(averagePhase - phase[i] - increment) / networkSize;
+			derivative += coupling[oscIndex][j] * PApplet.sin(phase[j] - increment);
 		}
-
 
 		return derivative;
 	}

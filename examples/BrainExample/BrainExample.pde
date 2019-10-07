@@ -1,4 +1,4 @@
-/*
+/**
  * Brain Example.
  *
  * Simulate the synchronization of neurons in the brain by varying their connective
@@ -10,10 +10,11 @@ import sync.*;
 
 PNetwork net;
 Arrangement arr;
+String arrName = "All-to-All";
 
 void setup() {
   size(640, 360);
-  int networkSize = 8;
+  int networkSize = 25;
   float coupling = 5;
   arr = new Arrangement(networkSize, coupling);
   float[] phase = new float[networkSize];
@@ -24,11 +25,13 @@ void setup() {
   }
   
   net = new PNetwork(this, phase, naturalFrequency, arr.allToAll);
+  noStroke();
 }
 
 void draw() {
   background(255);
-  noStroke();
+  fill(54, 86, 148);
+  text(arrName, 10, 20);
   translate(width/2, height/2);
   for (int i = 0; i < net.networkSize; i++) {
     float r = i * (TWO_PI / net.networkSize);
@@ -37,7 +40,7 @@ void draw() {
     rotate(r);
     translate(100, 0);
     fill(54, 86, 148, a);
-    circle(0, 0, 50);
+    circle(0, 0, 25);
     popMatrix();
   }
   net.step();
@@ -45,19 +48,24 @@ void draw() {
 
 void keyPressed() {
   switch (key) {
-    case '0':
+    case '1':
+      arrName = "Linear Unidirectional";
       net.coupling = arr.linearUnidirectional;
       break;
-    case '1':
+    case '2':
+      arrName = "Linear Bidirectional";
       net.coupling = arr.linearBidirectional;
       break;
-    case '2':
+    case '3':
+      arrName = "Box Unidirectional";
       net.coupling = arr.boxUnidirectional;
       break;
-    case '3':
+    case '4':
+      arrName = "Box Bidirectional";
       net.coupling = arr.boxBidirectional;
       break;
-    case '4':
+    case '5':
+      arrName = "All-to-All";
       net.coupling = arr.allToAll;
       break;
   }
