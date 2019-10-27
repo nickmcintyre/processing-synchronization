@@ -1,5 +1,7 @@
 package sync;
 
+import java.util.Arrays;
+
 import processing.core.*;
 
 /**
@@ -31,8 +33,6 @@ public class PNetwork implements PConstants {
 	public float[] phase;
 	public float[] velocity;
 	public float[] acceleration;
-	private float[] oldPhase;
-	private float[] oldVelocity;
 	
 	/**
 	 * Initialize the PNetwork object.
@@ -100,8 +100,6 @@ public class PNetwork implements PConstants {
 		this.stepSize = PApplet.constrain(stepSize, 0.001f, 1.0f);
 		this.noiseLevel = PApplet.constrain(noiseLevel, 0.0f, 1.0f);
 		this.phase = phase;
-		this.oldPhase = new float[networkSize];
-		setOldPhase();
 		initializeVelocity();
 		initializeAcceleration();
 	}
@@ -138,11 +136,9 @@ public class PNetwork implements PConstants {
 	 */
 	private void initializeCoupling(float coupling) {
 	    this.coupling = new float[networkSize][networkSize];
-		for (int i = 0; i < networkSize; i++) {
-			for (int j = 0; j < networkSize; j++) {
-				this.coupling[i][j] = coupling;
-			}
-		}
+	    for (int i = 0; i < networkSize; i++) {
+		    Arrays.fill(this.coupling[i], coupling);
+	    }
 	}
 	
 	/**
@@ -169,18 +165,6 @@ public class PNetwork implements PConstants {
 			phase[i] = TWO_PI * parent.noise(t);
 			t += dt;
 		}
-		
-		oldPhase = new float[networkSize];
-		setOldPhase();
-	}
-	
-	/**
-	 * Copy the current value of each oscillator's phase into oldPhase.
-	 */
-	private void setOldPhase() {
-		for (int i = 0; i < networkSize; i++) {
-			oldPhase[i] = phase[i];
-		}
 	}
 	
 	/**
@@ -188,21 +172,7 @@ public class PNetwork implements PConstants {
 	 */
 	private void initializeVelocity() {
 	    velocity = new float[networkSize];
-		for (int i = 0; i < networkSize; i++) {
-			velocity[i] = 0;
-		}
-		
-		oldVelocity = new float[networkSize];
-		setOldVelocity();
-	}
-	
-	/**
-	 * Copy the current value of each oscillator's velocity into oldVelocity.
-	 */
-	private void setOldVelocity() {
-		for (int i = 0; i < networkSize; i++) {
-			oldVelocity[i] = velocity[i];
-		}
+		Arrays.fill(velocity, 0);
 	}
 	
 	/**
@@ -210,9 +180,7 @@ public class PNetwork implements PConstants {
 	 */
 	private void initializeAcceleration() {
 	    acceleration = new float[networkSize];
-		for (int i = 0; i < networkSize; i++) {
-			acceleration[i] = 0;
-		}
+		Arrays.fill(acceleration, 0);
 	}
 	
 	/**
@@ -241,8 +209,8 @@ public class PNetwork implements PConstants {
 	 */
 	private void solveRK4() {
 		float noise = noiseLevel * parent.noise(time);
-		setOldPhase();
-		setOldVelocity();
+		float[] oldPhase = Arrays.copyOf(phase, networkSize);
+		float[] oldVelocity = Arrays.copyOf(velocity, networkSize);
 		for (int i = 0; i < networkSize; i++) {
 			// Calculate increments
 			float k1 = stepSize * differentiate(0.0f, i, noise);
