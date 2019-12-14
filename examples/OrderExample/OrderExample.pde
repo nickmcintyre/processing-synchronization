@@ -1,5 +1,5 @@
 /**
- * Motion Example.
+ * Order Example.
  *
  * Initialize a small network of coupled oscillators and watch them synchronize
  * around a circle. Color-code based on angular velocity and acceleration. Point

@@ -16,7 +16,7 @@ import processing.core.*;
  *
  * @example BrainExample
  * @example FireflyExample
- * @example MotionExample
+ * @example OrderExample
  * @example PhaseExample
  */
 public class PNetwork implements PConstants {
@@ -33,6 +33,8 @@ public class PNetwork implements PConstants {
 	public float[] phase;
 	public float[] velocity;
 	public float[] acceleration;
+	private float[] oldPhase;
+	
 	
 	/**
 	 * Initialize the PNetwork object.
@@ -50,6 +52,7 @@ public class PNetwork implements PConstants {
 		this.stepSize = PApplet.constrain(stepSize, 0.001f, 1.0f);
 		this.noiseLevel = PApplet.constrain(noiseLevel, 0.0f, 1.0f);
 		this.networkSize = networkSize;
+		this.oldPhase = new float[networkSize];
 	    initializeCoupling(coupling);
 		initializeFrequency();
 		initializePhase();
@@ -100,6 +103,7 @@ public class PNetwork implements PConstants {
 		this.stepSize = PApplet.constrain(stepSize, 0.001f, 1.0f);
 		this.noiseLevel = PApplet.constrain(noiseLevel, 0.0f, 1.0f);
 		this.phase = phase;
+		this.oldPhase = new float[networkSize];
 		initializeVelocity();
 		initializeAcceleration();
 	}
@@ -209,7 +213,7 @@ public class PNetwork implements PConstants {
 	 */
 	private void solveRK4() {
 		float noise = noiseLevel * parent.noise(time);
-		float[] oldPhase = Arrays.copyOf(phase, networkSize);
+		oldPhase = Arrays.copyOf(phase, networkSize);
 		float[] oldVelocity = Arrays.copyOf(velocity, networkSize);
 		for (int i = 0; i < networkSize; i++) {
 			// Calculate increments
@@ -242,7 +246,7 @@ public class PNetwork implements PConstants {
 	private float differentiate(float increment, int oscIndex, float noise) {
 		float derivative = naturalFrequency[oscIndex] + noise;
 		for (int j = 0; j < networkSize; j++) {
-			derivative += coupling[oscIndex][j] * PApplet.sin(phase[j] - increment);
+			derivative += coupling[oscIndex][j] * PApplet.sin(oldPhase[j] - increment);
 		}
 
 		return derivative;

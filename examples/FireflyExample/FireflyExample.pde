@@ -12,8 +12,8 @@ Swarm swarm;
 void setup() {
   size(640, 360);
   int networkSize = 150;
-  float coupling = 3;
-  float noiseLevel = 0.5;
+  float coupling = 1;
+  float noiseLevel = 0.25;
   net = new PNetwork(this, networkSize, coupling, noiseLevel);
   swarm = new Swarm(net);
   for (int i = 0; i < networkSize; i++) {
