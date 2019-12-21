@@ -246,7 +246,7 @@ public class PNetwork implements PConstants {
 	private float differentiate(float increment, int oscIndex, float noise) {
 		float derivative = naturalFrequency[oscIndex] + noise;
 		for (int j = 0; j < networkSize; j++) {
-			derivative += coupling[oscIndex][j] * PApplet.sin(oldPhase[j] - increment);
+			derivative += (coupling[oscIndex][j] / networkSize) * PApplet.sin(oldPhase[j] - increment);
 		}
 
 		return derivative;

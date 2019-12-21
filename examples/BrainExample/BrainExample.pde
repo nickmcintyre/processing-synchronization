@@ -15,7 +15,7 @@ String arrName = "All-to-All";
 void setup() {
   size(640, 360);
   int networkSize = 25;
-  float coupling = 2;
+  float coupling = 25;
   arr = new Arrangement(networkSize, coupling);
   float[] phase = new float[networkSize];
   float[] naturalFrequency = new float[networkSize];
