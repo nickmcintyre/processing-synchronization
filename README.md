@@ -3,207 +3,138 @@
 
 - Implements the [Kuramoto model](https://en.wikipedia.org/wiki/Kuramoto_model) for synchronization.
 - Supports oscillator networks of arbitrary size, coupling, connective arrangement, and noise level.
-- Still early days. Things will break.
 
 ## Example
-The following example simulates the synchronization of neurons in our brains.
+The following example simulates the swarming behavior and bioluminescence of fireflies. Pairs well with [Owl City](https://youtu.be/zlxPp0vAniY).
 
 ```java
+// Based on "Flocking" by Daniel Shiffman. CC BY-NC-SA 4.0
 import sync.*;
 
 PNetwork net;
-Arrangement arr;
+Swarm swarm;
 
 void setup() {
   size(640, 360);
-  int networkSize = 8;
-  float coupling = 5;
-  arr = new Arrangement(networkSize, coupling);
+  int networkSize = 100;
   float[] phase = new float[networkSize];
   float[] naturalFrequency = new float[networkSize];
+  float[][] coupling = new float[networkSize][networkSize];
   for (int i = 0; i < networkSize; i++) {
     phase[i] = random(TWO_PI);
-    naturalFrequency[i] = random(1);
+    naturalFrequency[i] = random(PI);
   }
-  
-  net = new PNetwork(this, phase, naturalFrequency, arr.allToAll);
+  net = new PNetwork(this, phase, naturalFrequency, coupling);
+  swarm = new Swarm(net);
+  for (int i = 0; i < networkSize; i++) {
+    swarm.addFly(new Firefly(width / 2, height / 2));
+  }
 }
 
 void draw() {
-  background(255);
-  noStroke();
-  translate(width/2, height/2);
-  for (int i = 0; i < net.networkSize; i++) {
-    float r = i * (TWO_PI / net.networkSize);
-    float a = map(net.phase[i], 0, TWO_PI, 0, 255);
-    pushMatrix();
-    rotate(r);
-    translate(100, 0);
-    fill(54, 86, 148, a);
-    circle(0, 0, 50);
-    popMatrix();
-  }
-  net.step();
+  background(0, 5, 20);
+  swarm.run();
 }
 
-void keyPressed() {
-  switch (key) {
-    case '0':
-      net.coupling = arr.linearUnidirectional;
-      break;
-    case '1':
-      net.coupling = arr.linearBidirectional;
-      break;
-    case '2':
-      net.coupling = arr.boxUnidirectional;
-      break;
-    case '3':
-      net.coupling = arr.boxBidirectional;
-      break;
-    case '4':
-      net.coupling = arr.allToAll;
-      break;
+// Vary the range of the swarm's natural frequencies
+void mousePressed() {
+  float lo = random(TWO_PI);
+  float hi = lo + random(TWO_PI - lo);
+  for (int i = 0; i < net.naturalFrequency.length; i++) {
+    net.naturalFrequency[i] = random(lo, hi);
   }
 }
 
-class Arrangement {
-  
-  int networkSize;
-  float coupling;
-  
-  float[][] linearUnidirectional;
-  float[][] linearBidirectional;
-  float[][] boxUnidirectional;
-  float[][] boxBidirectional;
-  float[][] allToAll;
-  
-  Arrangement(int _networkSize, float _coupling) {
-    networkSize = _networkSize;
-    coupling = _coupling;
-    initializeMatrices();
+// The Firefly class
+
+class Firefly {
+
+  PVector position;
+  PVector velocity;
+  PVector acceleration;
+  float d;
+  float maxforce;    // Maximum steering force
+  float maxspeed;    // Maximum speed
+
+  Firefly(float x, float y) {
+    acceleration = new PVector(0, 0);
+    velocity = PVector.random2D();
+    position = new PVector(x, y);
+    d = 10;
+    maxspeed = 2;
+    maxforce = 0.03;
   }
-  
-  void initializeMatrices() {
-    initializeLU();
-    initializeLB();
-    initializeBU();
-    initializeBB();
-    initializeA2A();
+
+  void run(float phase) {
+    update(phase);
+    borders();
+    render(phase);
   }
-  
-  /**
-   * Linear Unidirectional
-   * 
-   * {{0, X, 0, 0},
-   *  {0, 0, X, 0},
-   *  {0, 0, 0, X},
-   *  {0, 0, 0, 0}}
-   */
-  void initializeLU() {
-    linearUnidirectional = new float[networkSize][networkSize];
-    for (int i = 0; i < networkSize; i++) {
-      for (int j = 0; j < networkSize; j++) {
-        if (j == i + 1) {
-          linearUnidirectional[i][j] = coupling;
-        } else {
-          linearUnidirectional[i][j] = 0;
-        }
+
+  void applyForce(PVector force) {
+    // We could add mass here if we want A = F / M
+    acceleration.add(force);
+  }
+
+  // Method to update position
+  void update(float phase) {
+    // Update velocity
+    velocity.set(cos(phase), sin(phase));
+    velocity.add(acceleration);
+    // Limit speed
+    velocity.limit(maxspeed);
+    position.add(velocity);
+    // Reset accelertion to 0 each cycle
+    acceleration.mult(0);
+  }
+
+  void render(float phase) {
+    float alpha = 175 * round(map(phase, 0, TWO_PI, 0, 1));
+    fill(225, 240, 45, alpha);
+    stroke(225, 240, 45, alpha);
+    circle(position.x, position.y, d);
+  }
+
+  // Wraparound
+  void borders() {
+    float r = d / 2;
+    if (position.x < -r) position.x = width + r;
+    if (position.y < -r) position.y = height + r;
+    if (position.x > width + r) position.x = -r;
+    if (position.y > height + r) position.y = -r;
+  }
+}
+
+// The Swarm (a list of Firefly objects)
+
+class Swarm {
+  ArrayList<Firefly> flies; // An ArrayList for all the fireflies
+  PNetwork net; // A PNetwork of coupled oscillators
+  float maxdist = sqrt(pow(width, 2) + pow(height, 2));
+  float maxcouple = 10;
+
+  Swarm(PNetwork net_) {
+    flies = new ArrayList<Firefly>(); // Initialize the ArrayList
+    net = net_;
+  }
+
+  void run() {
+    // Update coupling based on proximity
+    for (int i = 0; i < flies.size(); i++) {
+      Firefly a = flies.get(i);
+      for (int j = i; j < flies.size(); j++) {
+        Firefly b = flies.get(j);
+        float coupling = maxcouple - map(a.position.dist(b.position), 0, maxdist, 0, maxcouple);
+        net.coupling[i][j] = coupling;
+        net.coupling[j][i] = coupling;
       }
+      a.run(net.phase[i]);  // Passing each firefly its updated phase
     }
+    net.step();
   }
-  
-  /**
-   * Linear Bidirectional
-   * 
-   * {{0, X, 0, 0},
-   *  {X, 0, X, 0},
-   *  {0, X, 0, X},
-   *  {0, 0, X, 0}}
-   */
-  void initializeLB() {
-    linearBidirectional = new float[networkSize][networkSize];
-    for (int i = 0; i < networkSize; i++) {
-      for (int j = 0; j < networkSize; j++) {
-        if (j == i + 1) {
-          linearBidirectional[i][j] = coupling;
-        } else if (i == j + 1) {
-          linearBidirectional[i][j] = coupling;
-        } else {
-          linearBidirectional[i][j] = 0;
-        }
-      }
-    }
-  }
-  
-  /**
-   * Box Unidirectional
-   * 
-   * {{0, X, 0, 0},
-   *  {0, 0, X, 0},
-   *  {0, 0, 0, X},
-   *  {X, 0, 0, 0}}
-   */
-  void initializeBU() {
-    boxUnidirectional = new float[networkSize][networkSize];
-    for (int i = 0; i < networkSize; i++) {
-      for (int j = 0; j < networkSize; j++) {
-        if (j == i + 1) {
-          boxUnidirectional[i][j] = coupling;
-        } else if (j == 0 && i == networkSize - 1) {
-          boxUnidirectional[i][j] = coupling;
-        } else {
-          boxUnidirectional[i][j] = 0;
-        }
-      }
-    }
-  }
-  
-  /**
-   * Box Bidirectional
-   * 
-   * {{0, X, 0, X},
-   *  {X, 0, X, 0},
-   *  {0, X, 0, X},
-   *  {X, 0, X, 0}}
-   */
-  void initializeBB() {
-    boxBidirectional = new float[networkSize][networkSize];
-    for (int i = 0; i < networkSize; i++) {
-      for (int j = 0; j < networkSize; j++) {
-        if (j == i + 1) {
-          boxBidirectional[i][j] = coupling;
-        } else if (i == j + 1) {
-          boxBidirectional[i][j] = coupling;
-        } else if (j == 0 && i == networkSize - 1) {
-          boxBidirectional[i][j] = coupling;
-        } else if (i == 0 && j == networkSize - 1) {
-          boxBidirectional[i][j] = coupling;
-        } else {
-          boxBidirectional[i][j] = 0;
-        }
-      }
-    }
-  }
-  
-  /**
-   * All-to-all
-   * 
-   * {{0, X, X, X},
-   *  {X, 0, X, X},
-   *  {X, X, 0, X},
-   *  {X, X, X, 0}}
-   */
-  void initializeA2A() {
-    allToAll = new float[networkSize][networkSize];
-    for (int i = 0; i < networkSize; i++) {
-      for (int j = 0; j < networkSize; j++) {
-        if (i == j) {
-          allToAll[i][j] = 0;
-        } else {
-          allToAll[i][j] = coupling;
-        }
-      }
-    }
+
+  void addFly(Firefly f) {
+    flies.add(f);
   }
 }
 ```

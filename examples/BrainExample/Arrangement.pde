@@ -9,9 +9,9 @@ class Arrangement {
   float[][] boxBidirectional;
   float[][] allToAll;
   
-  Arrangement(int _networkSize, float _coupling) {
-    networkSize = _networkSize;
-    coupling = _coupling;
+  Arrangement(int networkSize_, float coupling_) {
+    networkSize = networkSize_;
+    coupling = coupling_;
     initializeMatrices();
   }
   
