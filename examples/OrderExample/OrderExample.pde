@@ -26,8 +26,8 @@ void setup() {
 void draw() {
   background(220);
   // Calculate the overall order (cohesion) in the network
-  PVector order = net.calculateOrder();
-  float orderParameter = order.mag();
+  PVector order = net.getOrderVector();
+  float orderParameter = net.getOrderParameter();
   stroke(100);
   fill(100);
   String ordometer = String.format("Order: %.2f", orderParameter);
@@ -39,7 +39,7 @@ void draw() {
   ellipse(0, 0, 2*radius, 2*radius);
   
   // Draw a circle corresponding to the phase of each oscillator
-  for (int i = 0; i < net.networkSize; i++) {
+  for (int i = 0; i < net.size; i++) {
     pushMatrix();
     float x = radius*cos(net.phase[i]);
     float y = radius*sin(net.phase[i]);

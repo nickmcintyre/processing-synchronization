@@ -17,14 +17,8 @@ Swarm swarm;
 void setup() {
   size(640, 360);
   int networkSize = 100;
-  float[] phase = new float[networkSize];
-  float[] naturalFrequency = new float[networkSize];
-  float[][] coupling = new float[networkSize][networkSize];
-  for (int i = 0; i < networkSize; i++) {
-    phase[i] = random(TWO_PI);
-    naturalFrequency[i] = random(PI);
-  }
-  net = new PNetwork(this, phase, naturalFrequency, coupling);
+  float coupling = 10;
+  net = new PNetwork(this, networkSize, coupling);
   swarm = new Swarm(net);
   for (int i = 0; i < networkSize; i++) {
     swarm.addFly(new Firefly(width / 2, height / 2));
@@ -40,7 +34,7 @@ void draw() {
 void mousePressed() {
   float lo = random(TWO_PI);
   float hi = lo + random(TWO_PI - lo);
-  for (int i = 0; i < net.naturalFrequency.length; i++) {
+  for (int i = 0; i < net.size; i++) {
     net.naturalFrequency[i] = random(lo, hi);
   }
 }
