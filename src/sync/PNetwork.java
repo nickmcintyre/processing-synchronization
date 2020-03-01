@@ -372,11 +372,13 @@ public class PNetwork implements PConstants {
 			float k3 = stepSize * differentiate(k2/2, i, noise);
 			float k4 = stepSize * differentiate(k3, i, noise);
 			// Update phase
-			phase[i] = (phase[i] + (k1 + 2*k2 + 2*k3 + k4)/6) % TWO_PI;
+			phase[i] = (phase[i] + (k1 + 2*k2 + 2*k3 + k4)/6);
 			// Update velocity
 			velocity[i] = (phase[i] - oldPhase[i]) / stepSize;
 			// Update acceleration
 			acceleration[i] = (velocity[i] - oldVelocity[i]) / stepSize;
+			// Keep phase within TWO_PI
+			 phase[i] %= TWO_PI;
 		}
 		
 		time += stepSize;
