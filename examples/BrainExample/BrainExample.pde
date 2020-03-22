@@ -24,8 +24,8 @@ void draw() {
   fill(54, 86, 148);
   text(arrangement, 10, 20);
   translate(width/2, height/2);
-  for (int i = 0; i < net.size; i++) {
-    float r = i * (TWO_PI / net.size);
+  for (int i = 0; i < net.size(); i++) {
+    float r = i * (TWO_PI / net.size());
     float a = map(net.phase[i], 0, TWO_PI, 0, 255);
     pushMatrix();
     rotate(r);

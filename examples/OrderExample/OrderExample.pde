@@ -39,7 +39,7 @@ void draw() {
   ellipse(0, 0, 2*radius, 2*radius);
   
   // Draw a circle corresponding to the phase of each oscillator
-  for (int i = 0; i < net.size; i++) {
+  for (int i = 0; i < net.size(); i++) {
     pushMatrix();
     float x = radius*cos(net.phase[i]);
     float y = radius*sin(net.phase[i]);

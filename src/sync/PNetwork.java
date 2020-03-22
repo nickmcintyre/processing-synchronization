@@ -20,10 +20,11 @@ import processing.core.*;
  * @example PhaseExample
  */
 public class PNetwork implements PConstants {
+	
+	private int networkSize;
 
 	public PApplet parent;
 	
-	public int size;
 	public float time;
 	public float stepSize;
 	public float[][] coupling;
@@ -33,7 +34,7 @@ public class PNetwork implements PConstants {
 	public float[] phase;
 	public float[] velocity;
 	public float[] acceleration;
-	private float[] oldPhase;
+	public float[] oldPhase;
 	
 	
 	/**
@@ -51,7 +52,7 @@ public class PNetwork implements PConstants {
 		time = 0.0f;
 		this.stepSize = stepSize;
 		this.noiseLevel = noiseLevel;
-		this.size = size;
+		this.networkSize = size;
 		this.oldPhase = new float[size];
 	    initializeCoupling(coupling);
 		initializeFrequency();
@@ -98,12 +99,12 @@ public class PNetwork implements PConstants {
 		parent.registerMethod("dispose", this);
 		time = 0.0f;
 		this.naturalFrequency = naturalFrequency;
-		size = naturalFrequency.length;
+		networkSize = naturalFrequency.length;
 		this.coupling = coupling;
 		this.stepSize = stepSize;
 		this.noiseLevel = noiseLevel;
 		this.phase = phase;
-		this.oldPhase = new float[size];
+		this.oldPhase = new float[networkSize];
 		initializeVelocity();
 		initializeAcceleration();
 	}
@@ -139,7 +140,7 @@ public class PNetwork implements PConstants {
 	 * @param coupling The level of coupling between all oscillators.
 	 */
 	private void initializeCoupling(float coupling) {
-	    this.coupling = new float[size][size];
+	    this.coupling = new float[networkSize][networkSize];
 	    setCoupling(coupling);
 	}
 	
@@ -147,10 +148,10 @@ public class PNetwork implements PConstants {
 	 * Set natural frequencies of oscillators using Perlin noise.
 	 */
 	private void initializeFrequency() {
-		naturalFrequency = new float[size];
+		naturalFrequency = new float[networkSize];
 		float t = 0.0f;
 		float dt = 0.1f;
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < networkSize; i++) {
 			naturalFrequency[i] = TWO_PI * parent.noise(t);
 			t += dt;
 		}
@@ -160,10 +161,10 @@ public class PNetwork implements PConstants {
 	 * Set initial phases of oscillators using Perlin noise.
 	 */
 	private void initializePhase() {
-		phase = new float[size];
+		phase = new float[networkSize];
 		float t = 0.0f;
 		float dt = 0.1f;
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < networkSize; i++) {
 			phase[i] = TWO_PI * parent.noise(t);
 			t += dt;
 		}
@@ -173,7 +174,7 @@ public class PNetwork implements PConstants {
 	 * Set initial angular velocity of oscillators to 0.
 	 */
 	private void initializeVelocity() {
-	    velocity = new float[size];
+	    velocity = new float[networkSize];
 		Arrays.fill(velocity, 0);
 	}
 	
@@ -181,8 +182,17 @@ public class PNetwork implements PConstants {
 	 * Set initial angular acceleration of oscillators to 0.
 	 */
 	private void initializeAcceleration() {
-	    acceleration = new float[size];
+	    acceleration = new float[networkSize];
 		Arrays.fill(acceleration, 0);
+	}
+	
+	/**
+	 * Return the number of oscillators in the network.
+	 * 
+	 * @return The size of the network.
+	 */
+	public int size() {
+		return networkSize;
 	}
 
 	/**
@@ -247,8 +257,8 @@ public class PNetwork implements PConstants {
 			 *  {X, X, 0, X},
 			 *  {X, X, X, 0}}
 			 */
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
+			for (int i = 0; i < networkSize; i++) {
+				for (int j = 0; j < networkSize; j++) {
 					this.coupling[i][j] = coupling;
 				}
 			}
@@ -261,8 +271,8 @@ public class PNetwork implements PConstants {
 			 *  {0, 0, 0, X},
 			 *  {0, 0, 0, 0}}
 			 */
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
+			for (int i = 0; i < networkSize; i++) {
+				for (int j = 0; j < networkSize; j++) {
 			        if (j == i + 1) {
 			        	this.coupling[i][j] = coupling;
 			        } else {
@@ -279,8 +289,8 @@ public class PNetwork implements PConstants {
 			 *  {0, X, 0, X},
 			 *  {0, 0, X, 0}}
 			 */
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
+			for (int i = 0; i < networkSize; i++) {
+				for (int j = 0; j < networkSize; j++) {
 					if (j == i + 1) {
 						this.coupling[i][j] = coupling;
 					} else if (i == j + 1) {
@@ -299,11 +309,11 @@ public class PNetwork implements PConstants {
 			 *  {0, 0, 0, X},
 			 *  {X, 0, 0, 0}}
 			 */
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
+			for (int i = 0; i < networkSize; i++) {
+				for (int j = 0; j < networkSize; j++) {
 					if (j == i + 1) {
 			            this.coupling[i][j] = coupling;
-			        } else if (j == 0 && i == size - 1) {
+			        } else if (j == 0 && i == networkSize - 1) {
 			            this.coupling[i][j] = coupling;
 			        } else {
 			            this.coupling[i][j] = 0;
@@ -319,15 +329,15 @@ public class PNetwork implements PConstants {
 			 *  {0, X, 0, X},
 			 *  {X, 0, X, 0}}
 			 */
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
+			for (int i = 0; i < networkSize; i++) {
+				for (int j = 0; j < networkSize; j++) {
 					if (j == i + 1) {
 			            this.coupling[i][j] = coupling;
 			        } else if (i == j + 1) {
 			            this.coupling[i][j] = coupling;
-			        } else if (j == 0 && i == size - 1) {
+			        } else if (j == 0 && i == networkSize - 1) {
 			            this.coupling[i][j] = coupling;
-			        } else if (i == 0 && j == size - 1) {
+			        } else if (i == 0 && j == networkSize - 1) {
 			            this.coupling[i][j] = coupling;
 			        } else {
 			            this.coupling[i][j] = 0;
@@ -363,9 +373,9 @@ public class PNetwork implements PConstants {
 	 */
 	private void solveRK4() {
 		float noise = noiseLevel * parent.noise(time);
-		oldPhase = Arrays.copyOf(phase, size);
-		float[] oldVelocity = Arrays.copyOf(velocity, size);
-		for (int i = 0; i < size; i++) {
+		oldPhase = Arrays.copyOf(phase, networkSize);
+		float[] oldVelocity = Arrays.copyOf(velocity, networkSize);
+		for (int i = 0; i < networkSize; i++) {
 			// Calculate increments
 			float k1 = stepSize * differentiate(0.0f, i, noise);
 			float k2 = stepSize * differentiate(k1/2, i, noise);
@@ -397,8 +407,8 @@ public class PNetwork implements PConstants {
 	 */
 	private float differentiate(float increment, int oscIndex, float noise) {
 		float derivative = naturalFrequency[oscIndex] + noise;
-		for (int j = 0; j < size; j++) {
-			derivative += (coupling[oscIndex][j] / size) * PApplet.sin(oldPhase[j] - increment);
+		for (int j = 0; j < networkSize; j++) {
+			derivative += (coupling[oscIndex][j] / networkSize) * PApplet.sin(oldPhase[j] - increment);
 		}
 
 		return derivative;
@@ -411,12 +421,12 @@ public class PNetwork implements PConstants {
 	 */
 	public PVector getOrderVector() {
 		PVector orderVector = new PVector();
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < networkSize; i++) {
 			PVector phaseVector = new PVector(PApplet.cos(phase[i]), PApplet.sin(phase[i]));
 			orderVector.add(phaseVector);
 		}
 		
-		orderVector.div(size);
+		orderVector.div(networkSize);
 		
 		return orderVector;
 	}

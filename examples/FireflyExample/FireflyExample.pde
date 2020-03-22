@@ -15,7 +15,7 @@ void setup() {
   float coupling = 10;
   net = new PNetwork(this, networkSize, coupling);
   swarm = new Swarm(net);
-  for (int i = 0; i < networkSize; i++) {
+  for (int i = 0; i < net.size(); i++) {
     swarm.addFly(new Firefly(width / 2, height / 2));
   }
 }
@@ -29,7 +29,7 @@ void draw() {
 void mousePressed() {
   float lo = random(TWO_PI);
   float hi = lo + random(TWO_PI - lo);
-  for (int i = 0; i < net.size; i++) {
+  for (int i = 0; i < net.size(); i++) {
     net.naturalFrequency[i] = random(lo, hi);
   }
 }

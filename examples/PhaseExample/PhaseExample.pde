@@ -28,7 +28,7 @@ void draw() {
   // Draw a square corresponding to the phase of each oscillator
   fill(75, 190, 70);
   stroke(75, 190, 70);
-  for (int i = 0; i < net.size; i++) {
+  for (int i = 0; i < net.size(); i++) {
     pushMatrix();
     float x = displacement*cos(net.phase[i]);
     translate(x, i*side);
