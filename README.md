@@ -34,7 +34,7 @@ void draw() {
 void mousePressed() {
   float lo = random(TWO_PI);
   float hi = lo + random(TWO_PI - lo);
-  for (int i = 0; i < net.size; i++) {
+  for (int i = 0; i < net.size(); i++) {
     net.naturalFrequency[i] = random(lo, hi);
   }
 }
@@ -132,3 +132,4 @@ class Swarm {
   }
 }
 ```
+
